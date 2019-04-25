@@ -838,8 +838,8 @@
    */
   #define BLTOUCH_V3
   #if ENABLED(BLTOUCH_V3)
-    #define BLTOUCH_FORCE_5V_MODE
-    //#define BLTOUCH_FORCE_OPEN_DRAIN_MODE
+    //#define BLTOUCH_FORCE_5V_MODE
+    #define BLTOUCH_FORCE_OPEN_DRAIN_MODE
   #endif
 #endif
 
@@ -948,7 +948,7 @@
 #endif
 //#define PROBING_FANS_OFF          // Turn fans off when probing
 //#define PROBING_STEPPERS_OFF      // Turn steppers off (unless needed to hold position) when probing
-//#define DELAY_BEFORE_PROBING 200  // (ms) To prevent vibrations from triggering piezo sensors
+#define DELAY_BEFORE_PROBING 200  // (ms) To prevent vibrations from triggering piezo sensors
 
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
 // :{ 0:'Low', 1:'High' }
@@ -2023,7 +2023,8 @@
 // affecting heaters, and the fan if FAN_SOFT_PWM is enabled.
 // However, control resolution will be halved for each increment;
 // at zero value, there are 128 effective control positions.
-#define SOFT_PWM_SCALE 2
+// :[0,1,2,3,4,5,6,7]
+#define SOFT_PWM_SCALE 0
 
 // If SOFT_PWM_SCALE is set to a value higher than 0, dithering can
 // be used to mitigate the associated resolution loss. If enabled,
