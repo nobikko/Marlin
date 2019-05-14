@@ -832,7 +832,7 @@
  */
 #define BLTOUCH
 #if ENABLED(BLTOUCH)
-  #define BLTOUCH_DELAY 100   // (ms) Enable and increase if needed
+  #define BLTOUCH_DELAY 200   // (ms) Enable and increase if needed
 
   /**
    * BLTouch V3.0 and newer smart series
@@ -941,13 +941,13 @@
  * These options are most useful for the BLTouch probe, but may also improve
  * readings with inductive probes and piezo sensors.
  */
-//#define PROBING_HEATERS_OFF       // Turn heaters off when probing
+#define PROBING_HEATERS_OFF       // Turn heaters off when probing
 #if ENABLED(PROBING_HEATERS_OFF)
-  //#define WAIT_FOR_BED_HEATER     // Wait for bed to heat back up between probes (to improve accuracy)
+//  #define WAIT_FOR_BED_HEATER     // Wait for bed to heat back up between probes (to improve accuracy)
 #endif
-//#define PROBING_FANS_OFF          // Turn fans off when probing
-//#define PROBING_STEPPERS_OFF      // Turn steppers off (unless needed to hold position) when probing
-#define DELAY_BEFORE_PROBING 500  // (ms) To prevent vibrations from triggering piezo sensors
+#define PROBING_FANS_OFF          // Turn fans off when probing
+#define PROBING_STEPPERS_OFF      // Turn steppers off (unless needed to hold position) when probing
+#define DELAY_BEFORE_PROBING 1000  // (ms) To prevent vibrations from triggering piezo sensors
 
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
 // :{ 0:'Low', 1:'High' }
