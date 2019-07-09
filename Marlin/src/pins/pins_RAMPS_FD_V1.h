@@ -19,6 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#pragma once
 
 /**
  * RAMPS-FD
@@ -204,7 +205,7 @@
 
 #endif // HAS_SPI_LCD
 
-#if HAS_DRIVER(TMC2208) || HAS_DRIVER(TMC2209)
+#if HAS_TMC220x
   /**
    * TMC2208/TMC2209 stepper drivers
    *

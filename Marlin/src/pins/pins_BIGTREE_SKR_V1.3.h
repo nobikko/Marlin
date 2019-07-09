@@ -19,6 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#pragma once
 
 #ifndef TARGET_LPC1768
   #error "Oops!  Make sure you have the LPC1768 environment selected in your IDE."
@@ -110,13 +111,19 @@
 // Software SPI pins for TMC2130 stepper drivers
 //
 #if ENABLED(TMC_USE_SW_SPI)
-  #define TMC_SW_MOSI      P4_28
-  #define TMC_SW_MISO      P0_05
-  #define TMC_SW_SCK       P0_04
+  #ifndef TMC_SW_MOSI
+    #define TMC_SW_MOSI    P4_28
+  #endif
+  #ifndef TMC_SW_MISO
+    #define TMC_SW_MISO    P0_05
+  #endif
+  #ifndef TMC_SW_SCK
+    #define TMC_SW_SCK     P0_04
+  #endif
 #endif
 
-#if HAS_DRIVER(TMC2208) || HAS_DRIVER(TMC2209)
-    /**
+#if HAS_TMC220x
+  /**
    * TMC2208/TMC2209 stepper drivers
    *
    * Hardware serial communication ports.
