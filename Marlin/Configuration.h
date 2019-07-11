@@ -1012,7 +1012,8 @@
 // @section extruder
 
 // For direct drive extruder v9 set to true, for geared extruder set to false.
-#define INVERT_E0_DIR true // set to false for stock drivers or TMC2208 with reversed connectors
+//#define INVERT_E0_DIR true // set to false for stock drivers or TMC2208 with reversed connectors
+#define INVERT_E0_DIR false // set to false for stock drivers or TMC2208 with reversed connectors
 #define INVERT_E1_DIR true // set to false for stock drivers or TMC2208 with reversed connectors
 #define INVERT_E2_DIR false
 #define INVERT_E3_DIR false
@@ -1041,11 +1042,14 @@
 #define Y_BED_SIZE 215
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
-#define X_MIN_POS -5
-#define Y_MIN_POS 0
+//#define X_MIN_POS -5
+#define X_MIN_POS 0
+//#define Y_MIN_POS 0
+#define Y_MIN_POS -25
 #define Z_MIN_POS 0
-#define X_MAX_POS X_BED_SIZE
-#define Y_MAX_POS 225
+#define X_MAX_POS (X_BED_SIZE+X_MIN_POS)
+//#define Y_MAX_POS 225
+#define Y_MAX_POS (Y_BED_SIZE+Y_MIN_POS)
 #define Z_MAX_POS 205
 
 /**
@@ -1199,10 +1203,10 @@
   #define GRID_MAX_POINTS_Y GRID_MAX_POINTS_X
 
   // Set the boundaries for probing (where the probe can reach).
-  #define LEFT_PROBE_BED_POSITION 10
-  #define RIGHT_PROBE_BED_POSITION 190
-  #define FRONT_PROBE_BED_POSITION 10
-  #define BACK_PROBE_BED_POSITION 202
+  //#define LEFT_PROBE_BED_POSITION MIN_PROBE_EDGE
+  //#define RIGHT_PROBE_BED_POSITION (X_BED_SIZE - (MIN_PROBE_EDGE))
+  //#define FRONT_PROBE_BED_POSITION MIN_PROBE_EDGE
+  //#define BACK_PROBE_BED_POSITION (Y_BED_SIZE - (MIN_PROBE_EDGE))
 
   // Probe along the Y axis, advancing X after each column
   //#define PROBE_Y_FIRST
