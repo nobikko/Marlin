@@ -47,6 +47,8 @@
   #define IS_RAMPS_SF
 #endif
 
+#define HAS_FREE_AUX2_PINS !(BOTH(ULTRA_LCD, NEWPANEL) && ANY(PANEL_ONE, VIKI2, miniVIKI, MINIPANEL, REPRAPWORLD_KEYPAD))
+
 //
 // RAMPS 1.3 / 1.4 - ATmega1280, ATmega2560
 //
@@ -228,6 +230,8 @@
   #include "mega/pins_GT2560_V3_A20.h"          // ATmega2560                             env:megaatmega2560
 #elif MB(EINSTART_S)
   #include "mega/pins_EINSTART-S.h"             // ATmega1280, ATmega2560                 env:megaatmega1280 env:megaatmega2560
+#elif MB(WANHAO_ONEPLUS)
+  #include "mega/pins_WANHAO_ONEPLUS.h"         // ATmega2560                             env:megaatmega2560
 
 //
 // ATmega1281, ATmega2561
@@ -1077,3 +1081,5 @@
     #endif
   #endif
 #endif
+
+#undef HAS_FREE_AUX2_PINS
