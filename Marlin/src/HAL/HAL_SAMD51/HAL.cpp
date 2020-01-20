@@ -22,8 +22,8 @@
 #ifdef __SAMD51__
 
 #include "../../inc/MarlinConfig.h"
-#include "Adafruit_ZeroDMA.h"
-#include "wiring_private.h"
+#include <Adafruit_ZeroDMA.h>
+#include <wiring_private.h>
 
 // ------------------------
 // Local defines
@@ -59,6 +59,11 @@
 #else
   #define GET_TEMP_5_ADC()          -1
 #endif
+#if HAS_TEMP_PROBE
+  #define GET_PROBE_ADC()           PIN_TO_ADC(TEMP_PROBE_PIN)
+#else
+  #define GET_PROBE_ADC()           -1
+#endif
 #if HAS_TEMP_ADC_BED
   #define GET_BED_ADC()             PIN_TO_ADC(TEMP_BED_PIN)
 #else
@@ -82,6 +87,7 @@
 
 #define IS_ADC_REQUIRED(n)      (GET_TEMP_0_ADC() == n || GET_TEMP_1_ADC() == n || GET_TEMP_2_ADC() == n      \
                                  || GET_TEMP_3_ADC() == n || GET_TEMP_4_ADC() == n || GET_TEMP_5_ADC() == n   \
+                                 || GET_PROBE_ADC() == n                                                      \
                                  || GET_BED_ADC() == n                                                        \
                                  || GET_CHAMBER_ADC() == n                                                    \
                                  || GET_FILAMENT_WIDTH_ADC() == n                                             \
@@ -145,6 +151,9 @@ uint16_t HAL_adc_result;
     #if GET_TEMP_5_ADC() == 0
       TEMP_5_PIN,
     #endif
+    #if GET_PROBE_ADC() == 0
+      TEMP_PROBE_PIN,
+    #endif
     #if GET_BED_ADC() == 0
       TEMP_BED_PIN,
     #endif
@@ -175,6 +184,9 @@ uint16_t HAL_adc_result;
     #endif
     #if GET_TEMP_5_ADC() == 1
       TEMP_5_PIN,
+    #endif
+    #if GET_PROBE_ADC() == 1
+      TEMP_PROBE_PIN,
     #endif
     #if GET_BED_ADC() == 1
       TEMP_BED_PIN,
@@ -215,6 +227,9 @@ uint16_t HAL_adc_result;
       #if GET_TEMP_5_ADC() == 0
         { PIN_TO_INPUTCTRL(TEMP_5_PIN) },
       #endif
+      #if GET_PROBE_ADC() == 0
+        { PIN_TO_INPUTCTRL(TEMP_PROBE_PIN) },
+      #endif
       #if GET_BED_ADC() == 0
         { PIN_TO_INPUTCTRL(TEMP_BED_PIN) },
       #endif
@@ -254,6 +269,9 @@ uint16_t HAL_adc_result;
       #endif
       #if GET_TEMP_5_ADC() == 1
         { PIN_TO_INPUTCTRL(TEMP_5_PIN) },
+      #endif
+      #if GET_PROBE_ADC() == 1
+        { PIN_TO_INPUTCTRL(TEMP_PROBE_PIN) },
       #endif
       #if GET_BED_ADC() == 1
         { PIN_TO_INPUTCTRL(TEMP_BED_PIN) },
@@ -368,7 +386,7 @@ uint16_t HAL_adc_result;
 // ------------------------
 
 // HAL initialization task
-void HAL_init(void) {
+void HAL_init() {
   #if DMA_IS_REQUIRED
     dma_init();
   #endif
@@ -383,15 +401,15 @@ void HAL_init(void) {
 
 // HAL idle task
 /*
-void HAL_idletask(void) {
+void HAL_idletask() {
 }
 */
 
-void HAL_clear_reset_source(void) { }
+void HAL_clear_reset_source() { }
 
 #pragma push_macro("WDT")
 #undef WDT    // Required to be able to use '.bit.WDT'. Compiler wrongly replace struct field with WDT define
-uint8_t HAL_get_reset_source(void) {
+uint8_t HAL_get_reset_source() {
   RSTC_RCAUSE_Type resetCause;
 
   resetCause.reg = REG_RSTC_RCAUSE;
@@ -414,19 +432,19 @@ extern "C" {
 // Return free memory between end of heap (or end bss) and whatever is current
 int freeMemory() {
   int free_memory, heap_end = (int)_sbrk(0);
-  return (int)&free_memory - (heap_end ? heap_end : (int)&__bss_end__);
+  return (int)&free_memory - (heap_end ?: (int)&__bss_end__);
 }
 
 // ------------------------
 // ADC
 // ------------------------
 
-void HAL_adc_init(void) {
+void HAL_adc_init() {
   #if ADC_IS_REQUIRED
     memset(HAL_adc_results, 0xFF, sizeof(HAL_adc_results));                 // Fill result with invalid values
 
     for (uint8_t pi = 0; pi < COUNT(adc_pins); ++pi)
-        pinPeripheral(adc_pins[pi], PIO_ANALOG);
+      pinPeripheral(adc_pins[pi], PIO_ANALOG);
 
     for (uint8_t ai = FIRST_ADC; ai <= LAST_ADC; ++ai) {
       Adc* adc = ((Adc*[])ADC_INSTS)[ai];
@@ -442,9 +460,11 @@ void HAL_adc_init(void) {
       // Preloaded data (fixed for all ADC instances hence not loaded by DMA)
       adc->REFCTRL.bit.REFSEL = ADC_REFCTRL_REFSEL_AREFA_Val;               // VRefA pin
       SYNC(adc->SYNCBUSY.bit.REFCTRL);
-      adc->CTRLB.bit.RESSEL = ADC_CTRLB_RESSEL_10BIT_Val;
+      adc->CTRLB.bit.RESSEL = ADC_CTRLB_RESSEL_12BIT_Val;
       SYNC(adc->SYNCBUSY.bit.CTRLB);
       adc->SAMPCTRL.bit.SAMPLEN = (6 - 1);                                  // Sampling clocks
+      adc->AVGCTRL.reg = ADC_AVGCTRL_SAMPLENUM_16 | ADC_AVGCTRL_ADJRES(4);  // 16 Accumulated conversions and shift 4 to get oversampled 12 bits result
+      SYNC(adc->SYNCBUSY.bit.AVGCTRL);
       // Registers loaded by DMA
       adc->DSEQCTRL.bit.INPUTCTRL = true;
 
@@ -467,10 +487,6 @@ void HAL_adc_start_conversion(const uint8_t adc_pin) {
   #endif
 
   HAL_adc_result = 0xFFFF;
-}
-
-uint16_t HAL_adc_get_result(void) {
-  return HAL_adc_result;
 }
 
 #endif // __SAMD51__
